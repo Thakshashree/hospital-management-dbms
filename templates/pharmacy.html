@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Pharmacy Inventory{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-8">
+    <h2 class="text-3xl font-bold text-slate-800 dark:text-white">Pharmacy Inventory</h2>
+    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="btn-primary">
+        <i data-lucide="plus" class="w-5 h-5 mr-2 inline"></i> Add Medicine
+    </button>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2 card p-6">
+        <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white">Current Stock</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left table-auto">
+                <thead>
+                    <tr class="text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                        <th class="pb-3 font-medium">Medicine Name</th>
+                        <th class="pb-3 font-medium">Stock</th>
+                        <th class="pb-3 font-medium">Reorder Level</th>
+                        <th class="pb-3 font-medium">Expiry Date</th>
+                        <th class="pb-3 font-medium">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for item in inventory %}
+                    <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+                        <td class="py-3 text-slate-800 dark:text-slate-200">{{ item.med_name }}</td>
+                        <td class="py-3 text-slate-600 dark:text-slate-400 font-semibold">{{ item.stock }}</td>
+                        <td class="py-3 text-slate-600 dark:text-slate-400">{{ item.reorder_level }}</td>
+                        <td class="py-3 text-slate-600 dark:text-slate-400">{{ item.expiry_date }}</td>
+                        <td class="py-3">
+                            {% if item.stock <= item.reorder_level %}
+                            <span class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-semibold">Low Stock</span>
+                            {% else %}
+                            <span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">Good</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card p-6 bg-gradient-to-br from-violet-50 to-sky-50 dark:from-slate-800 dark:to-slate-800 border border-sky-100 dark:border-slate-700">
+        <h3 class="text-xl font-semibold mb-4 text-sky-800 dark:text-sky-300 flex items-center">
+            <i data-lucide="sparkles" class="w-5 h-5 mr-2"></i> AI Assistant
+        </h3>
+        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">Get AI recommendations for reordering stock based on current inventory levels and expiry dates.</p>
+        <button onclick="getAISuggestions()" id="aiBtn" class="w-full btn-primary bg-gradient-to-r from-sky-500 to-violet-500 mb-4">
+            Generate Reorder Plan
+        </button>
+        <div id="aiResult" class="hidden mt-4 p-4 bg-white dark:bg-slate-900 rounded-xl shadow-inner text-sm text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
+            <div class="flex space-x-2 animate-pulse" id="aiLoading">
+                <div class="w-2 h-2 bg-sky-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-sky-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-sky-500 rounded-full"></div>
+            </div>
+            <p id="aiText" class="hidden"></p>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+        <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Add Medicine</h3>
+        <form method="POST" action="/pharmacy">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Medicine Name</label>
+                    <input type="text" name="med_name" required class="w-full px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Initial Stock</label>
+                        <input type="number" name="stock" required class="w-full px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Reorder Level</label>
+                        <input type="number" name="reorder_level" required class="w-full px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Expiry Date</label>
+                    <input type="date" name="expiry_date" required class="w-full px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">Cancel</button>
+                <button type="submit" class="btn-primary">Save Medicine</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function getAISuggestions() {
+    const resultBox = document.getElementById('aiResult');
+    const loading = document.getElementById('aiLoading');
+    const text = document.getElementById('aiText');
+    const btn = document.getElementById('aiBtn');
+    
+    resultBox.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    text.classList.add('hidden');
+    btn.disabled = true;
+    
+    fetch('/pharmacy/ai-suggestions', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            text.textContent = data.suggestion;
+            text.classList.remove('hidden');
+            btn.disabled = false;
+        })
+        .catch(err => {
+            loading.classList.add('hidden');
+            text.textContent = "Failed to fetch AI suggestions.";
+            text.classList.remove('hidden');
+            btn.disabled = false;
+        });
+}
+</script>
+{% endblock %}

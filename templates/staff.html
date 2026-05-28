@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center h-100 border-start border-primary border-4">
+            <div class="card-body">
+                <i class="fas fa-users card-icon mb-3"></i>
+                <h5 class="card-title text-muted">Total Patients</h5>
+                <h2 class="font-weight-bold">{{ total_patients }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 border-start border-success border-4">
+            <div class="card-body">
+                <i class="fas fa-calendar card-icon text-success mb-3"></i>
+                <h5 class="card-title text-muted">Today's Appts</h5>
+                <h2 class="font-weight-bold">{{ today_appointments }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 border-start border-info border-4">
+            <div class="card-body">
+                <i class="fas fa-bed card-icon text-info mb-3"></i>
+                <h5 class="card-title text-muted">Available Beds</h5>
+                <h2 class="font-weight-bold">{{ available_beds }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 border-start border-danger border-4">
+            <div class="card-body">
+                <i class="fas fa-file-invoice card-icon text-danger mb-3"></i>
+                <h5 class="card-title text-muted">Pending Bills</h5>
+                <h2 class="font-weight-bold">{{ pending_bills }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h6 class="text-uppercase text-muted font-weight-bold mb-0">Appointments (Last 7 Days)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="apptChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h6 class="text-uppercase text-muted font-weight-bold mb-0">Revenue (6 Months)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Access Modules -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Patients Management</h5>
+                <p class="card-text text-muted">Register and manage patient profiles.</p>
+                <a href="{{ url_for('staff.patients') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-user-md fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Doctors Roster</h5>
+                <p class="card-text text-muted">Manage doctor profiles and schedules.</p>
+                <a href="{{ url_for('staff.doctors') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Appointments</h5>
+                <p class="card-text text-muted">View and manage all appointments.</p>
+                <a href="{{ url_for('staff.appointments') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Row 2 -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-bed fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Room Management</h5>
+                <p class="card-text text-muted">Track bed availability and admissions.</p>
+                <a href="{{ url_for('staff.rooms') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-flask fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Laboratory</h5>
+                <p class="card-text text-muted">Manage tests and lab results.</p>
+                <a href="{{ url_for('staff.lab') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <i class="fas fa-file-invoice-dollar fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Billing & Finance</h5>
+                <p class="card-text text-muted">Manage invoices and payments.</p>
+                <a href="{{ url_for('staff.billing') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const apptCtx = document.getElementById('apptChart').getContext('2d');
+    new Chart(apptCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|tojson }},
+            datasets: [{
+                label: 'Appointments',
+                data: {{ appt_counts|tojson }},
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ revenue_labels|tojson }},
+            datasets: [{
+                label: 'Revenue ($)',
+                data: {{ revenue_data|tojson }},
+                backgroundColor: '#198754'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

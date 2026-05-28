@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Hospital Analytics</h2>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">Revenue by Month</div>
+            <div class="card-body"><canvas id="revenueChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">Appointments per Doctor</div>
+            <div class="card-body"><canvas id="doctorChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">Feedback Sentiment</div>
+            <div class="card-body"><canvas id="sentimentChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">Room Occupancy</div>
+            <div class="card-body"><canvas id="roomChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script>
+fetch("{{ url_for('analytics.data') }}")
+    .then(response => response.json())
+    .then(data => {
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'bar',
+            data: { labels: data.revenue.labels, datasets: [{ label: 'Revenue ($)', data: data.revenue.data, backgroundColor: '#0d6efd' }] }
+        });
+        new Chart(document.getElementById('doctorChart'), {
+            type: 'bar',
+            data: { labels: data.appointments.labels, datasets: [{ label: 'Appointments', data: data.appointments.data, backgroundColor: '#198754' }] }
+        });
+        new Chart(document.getElementById('sentimentChart'), {
+            type: 'pie',
+            data: { labels: data.sentiment.labels, datasets: [{ data: data.sentiment.data, backgroundColor: ['#198754', '#dc3545', '#6c757d'] }] }
+        });
+        new Chart(document.getElementById('roomChart'), {
+            type: 'doughnut',
+            data: { labels: data.rooms.labels, datasets: [{ data: data.rooms.data, backgroundColor: ['#dc3545', '#20c997'] }] }
+        });
+    });
+</script>
+{% endblock %}

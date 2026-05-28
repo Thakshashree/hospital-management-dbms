@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}AI Appointment Reminders{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-slate-800 dark:text-white">AI Appointment Reminders</h2>
+    <p class="text-slate-600 dark:text-slate-400 mt-2">Generate personalized SMS reminders for upcoming appointments using Gemini AI.</p>
+</div>
+
+<div class="card p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-slate-800 dark:text-white">Upcoming Appointments ({{ tomorrow }})</h3>
+        <span class="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold">{{ upcoming|length }} scheduled</span>
+    </div>
+    
+    {% if upcoming %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-left table-auto">
+            <thead>
+                <tr class="text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                    <th class="pb-3 font-medium">Patient</th>
+                    <th class="pb-3 font-medium">Doctor</th>
+                    <th class="pb-3 font-medium">Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                {% for a in upcoming %}
+                <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750">
+                    <td class="py-4">
+                        <p class="font-semibold text-slate-800 dark:text-slate-200">{{ a.patient_name }}</p>
+                        <p class="text-xs text-slate-500">{{ a.phone }}</p>
+                    </td>
+                    <td class="py-4 text-slate-600 dark:text-slate-400">Dr. {{ a.doctor_name }}</td>
+                    <td class="py-4">
+                        <button onclick="generateReminder('{{ a.patient_name }}', '{{ a.doctor_name }}', '{{ a.appt_date }}')" class="btn-primary text-sm py-1.5 px-3">
+                            <i data-lucide="bot" class="w-4 h-4 mr-1 inline"></i> Gen AI SMS
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-8">
+        <p class="text-slate-500">No appointments scheduled for tomorrow.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Reminder Modal -->
+<div id="reminderModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+        <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center">
+            <i data-lucide="message-square" class="w-5 h-5 mr-2 text-sky-500"></i> Generated SMS
+        </h3>
+        
+        <div id="smsLoading" class="hidden flex justify-center py-6">
+            <div class="flex space-x-2 animate-pulse">
+                <div class="w-3 h-3 bg-sky-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-sky-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-sky-500 rounded-full"></div>
+            </div>
+        </div>
+        
+        <div id="smsContent" class="hidden">
+            <div class="p-4 bg-sky-50 dark:bg-slate-900 border border-sky-100 dark:border-slate-700 rounded-xl mb-6">
+                <p id="smsText" class="text-slate-700 dark:text-slate-300 text-sm"></p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="document.getElementById('reminderModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">Close</button>
+                <button onclick="alert('SMS Sent! (Mock)')" class="btn-primary flex items-center">
+                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Send SMS
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReminder(patient, doctor, date) {
+    const modal = document.getElementById('reminderModal');
+    const loading = document.getElementById('smsLoading');
+    const content = document.getElementById('smsContent');
+    const textEl = document.getElementById('smsText');
+    
+    modal.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    content.classList.add('hidden');
+    
+    fetch('/admin/generate-reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patient_name: patient, doctor_name: doctor, date: date, time: '10:00 AM' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        loading.classList.add('hidden');
+        textEl.textContent = data.message;
+        content.classList.remove('hidden');
+    })
+    .catch(err => {
+        loading.classList.add('hidden');
+        textEl.textContent = "Error generating reminder.";
+        content.classList.remove('hidden');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Patient Summary{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <a href="/" class="text-sky-500 hover:text-sky-600 mb-4 inline-block"><i data-lucide="arrow-left" class="w-4 h-4 inline"></i> Back to Dashboard</a>
+    <h2 class="text-3xl font-bold text-slate-800 dark:text-white">AI Patient Summary</h2>
+</div>
+
+{% if patient %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="card p-6 bg-gradient-to-br from-sky-500 to-violet-500 text-white">
+        <div class="flex items-center space-x-4 mb-6">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold backdrop-blur-sm">
+                {{ patient.name[0] }}
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold">{{ patient.name }}</h3>
+                <p class="text-sky-100">Patient ID: #{{ patient.id }}</p>
+            </div>
+        </div>
+        <div class="space-y-2 text-sm text-sky-50">
+            <p><strong>Age:</strong> {{ patient.age or 'Unknown' }}</p>
+            <p><strong>Phone:</strong> {{ patient.phone }}</p>
+            <p><strong>Registered:</strong> {{ patient.created_at|default('Recently') }}</p>
+        </div>
+    </div>
+    
+    <div class="lg:col-span-2 card p-6 border-l-4 border-violet-500">
+        <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white flex items-center">
+            <i data-lucide="sparkles" class="w-5 h-5 mr-2 text-violet-500"></i> AI Generated Summary
+        </h3>
+        <div class="prose prose-slate dark:prose-invert max-w-none">
+            {{ ai_summary | safe | replace('\n', '<br>') }}
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card p-6">
+        <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white">Recent Appointments</h3>
+        {% if appts %}
+        <div class="space-y-4">
+            {% for a in appts %}
+            <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="font-semibold text-slate-800 dark:text-slate-200">{{ a.appt_date }}</span>
+                    <span class="text-xs px-2 py-1 bg-sky-100 text-sky-600 rounded-full">{{ a.status|default('Completed') }}</span>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-400"><strong>Dr. {{ a.doctor_name }}</strong> ({{ a.specialization }})</p>
+                {% if a.notes %}
+                <p class="text-sm mt-2 text-slate-500 dark:text-slate-500 italic">"{{ a.notes }}"</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-slate-500 text-sm">No recent appointments found.</p>
+        {% endif %}
+    </div>
+    
+    <div class="card p-6">
+        <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white">Prescription History</h3>
+        {% if prescriptions %}
+        <ul class="space-y-3">
+            {% for p in prescriptions %}
+            <li class="flex items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                <i data-lucide="pill" class="w-5 h-5 text-sky-500 mr-3 flex-shrink-0"></i>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ p.medicine }}</p>
+                    <p class="text-xs text-slate-500">{{ p.dosage }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-slate-500 text-sm">No prescription history found.</p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="text-center py-12">
+    <h3 class="text-xl text-slate-600 dark:text-slate-400">Patient not found or invalid ID.</h3>
+</div>
+{% endif %}
+{% endblock %}

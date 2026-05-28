@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}HMS Pro{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f8f9fa; }
+    .sidebar { min-height: 100vh; background-color: #212529; color: white; padding-top: 20px;}
+    .sidebar .nav-link { color: rgba(255,255,255,.75); padding: 12px 20px; font-weight: 500;}
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: white; background-color: rgba(255,255,255,.1); border-radius: 5px; }
+    .main-content { padding: 30px; }
+    .card { box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075); border: none; border-radius: 0.5rem; margin-bottom: 20px;}
+  </style>
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand" href="/"><i class="fas fa-hospital me-2"></i> HMS Pro</a>
+    <div class="d-flex align-items-center text-white">
+      <span class="me-3"><i class="fas fa-user-circle me-1"></i> Welcome, {{ current_user.name.split('@')[0] if '@' in current_user.name else current_user.name }}</span>
+      <a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div id="main-wrapper">
+    {% if not current_user.is_authenticated %}
+        <div class="container mt-5">
+    {% else %}
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-md-2 d-none d-md-block sidebar px-3">
+                    <ul class="nav flex-column">
+                        {% if current_user.role == 'staff' %}
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.dashboard' else '' }}" href="{{ url_for('staff.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.patients' else '' }}" href="{{ url_for('staff.patients') }}"><i class="fas fa-users"></i> Patients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.doctors' else '' }}" href="{{ url_for('staff.doctors') }}"><i class="fas fa-user-md"></i> Doctors</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.appointments' else '' }}" href="{{ url_for('staff.appointments') }}"><i class="fas fa-calendar-check"></i> Appointments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.rooms' else '' }}" href="{{ url_for('staff.rooms') }}"><i class="fas fa-bed"></i> Rooms</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.lab' else '' }}" href="{{ url_for('staff.lab') }}"><i class="fas fa-flask"></i> Lab Reports</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.billing' else '' }}" href="{{ url_for('staff.billing') }}"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.inventory' else '' }}" href="{{ url_for('staff.inventory') }}"><i class="fas fa-boxes"></i> Inventory</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'staff.feedback' else '' }}" href="{{ url_for('staff.feedback') }}"><i class="fas fa-star"></i> Feedback</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="alert('Select a patient to view records')"><i class="fas fa-notes-medical"></i> Records</a>
+                            </li>
+                        {% elif current_user.role == 'patient' %}
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.dashboard' else '' }}" href="{{ url_for('patient.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.book' else '' }}" href="{{ url_for('patient.book') }}"><i class="fas fa-calendar-plus"></i> Book Appointment</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.appointments' else '' }}" href="{{ url_for('patient.appointments') }}"><i class="fas fa-calendar-check"></i> My Appointments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.lab' else '' }}" href="{{ url_for('patient.lab') }}"><i class="fas fa-flask"></i> Lab Reports</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.billing' else '' }}" href="{{ url_for('patient.billing') }}"><i class="fas fa-file-invoice-dollar"></i> Bills</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'patient.feedback' else '' }}" href="{{ url_for('patient.feedback') }}"><i class="fas fa-star"></i> Feedback</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <main class="col-md-10 ms-sm-auto px-md-4 main-content">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                        <h1 class="h2">{% block page_title %}{% endblock %}</h1>
+                    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, msg in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
+                    {{ msg }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    {% if current_user.is_authenticated %}
+                </main>
+            </div>
+        </div>
+    {% else %}
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

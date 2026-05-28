@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-4">
+        <div class="card text-center h-100 border-start border-primary border-4">
+            <div class="card-body">
+                <i class="fas fa-calendar-alt card-icon mb-3"></i>
+                <h5 class="card-title text-muted">Upcoming Appointments</h5>
+                <h2 class="font-weight-bold">{{ upcoming_appointments }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100 border-start border-danger border-4">
+            <div class="card-body">
+                <i class="fas fa-file-invoice card-icon text-danger mb-3"></i>
+                <h5 class="card-title text-muted">Pending Bills</h5>
+                <h2 class="font-weight-bold">{{ pending_bills }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100 border-start border-info border-4">
+            <div class="card-body">
+                <i class="fas fa-flask card-icon text-info mb-3"></i>
+                <h5 class="card-title text-muted">Latest Lab Report</h5>
+                <h4 class="mt-2">{{ latest_lab_report.test_name if latest_lab_report else 'No Reports' }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Next 5 Appointments</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped datatable">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt in next_appointments %}
+                <tr>
+                    <td>{{ appt.doctor.name }}</td>
+                    <td>{{ appt.date }}</td>
+                    <td>{{ appt.time }}</td>
+                    <td><span class="badge bg-{{ 'success' if appt.status == 'Approved' else 'warning' }}">{{ appt.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
