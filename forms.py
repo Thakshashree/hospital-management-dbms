@@ -69,3 +69,8 @@ class AppointmentForm(FlaskForm):
 class FeedbackForm(FlaskForm):
     rating = SelectField('Rating', choices=[(5, '5 - Excellent'), (4, '4 - Good'), (3, '3 - Average'), (2, '2 - Poor'), (1, '1 - Terrible')], coerce=int)
     comment = TextAreaField('Your Feedback', validators=[DataRequired()])
+
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
