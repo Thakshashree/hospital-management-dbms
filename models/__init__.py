@@ -21,6 +21,8 @@ def create_app():
     app.register_blueprint(staff_bp)
     app.register_blueprint(patient_bp)
     app.register_blueprint(public_bp)
+    # Note: doctor_bp, appointment_bp, room_bp, lab_bp, inventory_bp, feedback_bp
+    # are intentionally NOT registered here — all those routes now live in staff_bp.
     
     with app.app_context():
         db.create_all()
@@ -154,6 +156,7 @@ class Feedback(db.Model):
     comment = db.Column(db.Text)
     status = db.Column(db.String(20), default='Open')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    patient = db.relationship('User', foreign_keys=[patient_id])
 
 class MedicalRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)

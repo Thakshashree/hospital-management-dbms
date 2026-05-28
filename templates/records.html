@@ -1,168 +1,168 @@
 {% extends "base.html" %}
 
-{% block title %}Patient Medical Records{% endblock %}
-{% block page_title %}Medical Profile: {{ patient.name }}{% endblock %}
+{% block title %}Hospital Records Dashboard{% endblock %}
+{% block page_title %}Hospital Records Directory{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <!-- Patient Profile Summary -->
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
-                        {{ patient.name[0] }}
-                    </div>
+<div class="row g-3 mb-4">
+    <!-- Stat Cards -->
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ total_patients }}</h3>
+                    <small>Total Patients Registered</small>
                 </div>
-                <h4 class="font-weight-bold">{{ patient.name }}</h4>
-                <p class="text-muted mb-1">{{ patient.email }}</p>
-                {% if patient.patient_profile %}
-                <p class="text-muted"><i class="fas fa-phone"></i> {{ patient.patient_profile[0].phone }}</p>
-                <div class="d-flex justify-content-center gap-2 mt-3">
-                    <span class="badge bg-danger">Blood: {{ patient.patient_profile[0].blood_group }}</span>
-                    <span class="badge bg-info">DOB: {{ patient.patient_profile[0].dob }}</span>
-                </div>
-                <hr>
-                <div class="text-start">
-                    <small class="text-muted d-block">Emergency Contact</small>
-                    <strong>{{ patient.patient_profile[0].emergency_contact }}</strong>
-                </div>
-                {% endif %}
+                <i class="fas fa-users fa-3x opacity-50"></i>
             </div>
         </div>
     </div>
-    
-    <!-- Quick Stats -->
-    <div class="col-md-8">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card bg-primary text-white border-0 text-center py-4 h-100 shadow-sm">
-                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                    <h3 class="mb-0">{{ appointments|length }}</h3>
-                    <small>Total Visits</small>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ total_doctors }}</h3>
+                    <small>Doctors Roster</small>
                 </div>
+                <i class="fas fa-user-md fa-3x opacity-50"></i>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-success text-white border-0 text-center py-4 h-100 shadow-sm">
-                    <i class="fas fa-flask fa-2x mb-2"></i>
-                    <h3 class="mb-0">{{ lab_reports|length }}</h3>
-                    <small>Lab Reports</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-info text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ total_appointments }}</h3>
+                    <small>Total Appointments</small>
                 </div>
+                <i class="fas fa-calendar-check fa-3x opacity-50"></i>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-warning text-dark border-0 text-center py-4 h-100 shadow-sm">
-                    <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i>
-                    <h3 class="mb-0">{{ invoices|length }}</h3>
-                    <small>Invoices</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-warning text-dark shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ available_rooms }} / {{ total_rooms }}</h3>
+                    <small>Beds Available</small>
                 </div>
+                <i class="fas fa-bed fa-3x opacity-50"></i>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tabs for detailed history -->
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white pt-3 pb-0 border-bottom">
-        <ul class="nav nav-tabs border-bottom-0" id="recordsTab" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#visits">Visit History</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#labs">Lab Results</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#billing">Billing</button>
-            </li>
-        </ul>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 bg-danger text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ pending_bills }}</h3>
+                    <small>Pending Bills</small>
+                </div>
+                <i class="fas fa-file-invoice-dollar fa-3x opacity-50"></i>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="tab-content" id="recordsTabContent">
-            <!-- Visits Tab -->
-            <div class="tab-pane fade show active" id="visits">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Doctor</th>
-                            <th>Department</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appt in appointments %}
-                        <tr>
-                            <td>{{ appt.date }}</td>
-                            <td>Dr. {{ appt.doctor.name if appt.doctor else 'N/A' }}</td>
-                            <td>{{ appt.department }}</td>
-                            <td>{{ appt.reason }}</td>
-                            <td><span class="badge bg-{{ 'success' if appt.status == 'Approved' else 'secondary' }}">{{ appt.status }}</span></td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="5" class="text-center text-muted">No visit history found.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="col-md-4">
+        <div class="card border-0 bg-secondary text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ total_lab }}</h3>
+                    <small>Lab Tests Processed</small>
+                </div>
+                <i class="fas fa-vial fa-3x opacity-50"></i>
             </div>
-            
-            <!-- Labs Tab -->
-            <div class="tab-pane fade" id="labs">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Test Name</th>
-                            <th>Doctor</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for report in lab_reports %}
-                        <tr>
-                            <td>{{ report.date.strftime('%Y-%m-%d') if report.date else 'N/A' }}</td>
-                            <td>{{ report.test_name }}</td>
-                            <td>Dr. {{ report.doctor.name if report.doctor else 'N/A' }}</td>
-                            <td><span class="badge bg-info">{{ report.status }}</span></td>
-                            <td><button class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i> View PDF</button></td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="5" class="text-center text-muted">No lab reports found.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-dark text-white shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center py-4">
+                <div>
+                    <h3 class="mb-0">{{ total_feedback }}</h3>
+                    <small>Patient Reviews Received</small>
+                </div>
+                <i class="fas fa-star fa-3x opacity-50"></i>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Billing Tab -->
-            <div class="tab-pane fade" id="billing">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for invoice in invoices %}
-                        <tr>
-                            <td>{{ invoice.date.strftime('%Y-%m-%d') if invoice.date else 'N/A' }}</td>
-                            <td>{{ invoice.description }}</td>
-                            <td>${{ invoice.amount }}</td>
-                            <td>
-                                {% if invoice.status == 'Paid' %}
-                                <span class="badge bg-success">Paid</span>
-                                {% else %}
-                                <span class="badge bg-danger">Unpaid</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4" class="text-center text-muted">No billing history found.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="row g-3">
+    <!-- Recent Patients Table -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-user-plus text-primary me-2"></i> Recent Patient Registrations</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_patients|length == 0 %}
+                <p class="text-center text-muted my-4">No recent patients found.</p>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in recent_patients %}
+                            <tr>
+                                <td><strong>{{ patient.name }}</strong></td>
+                                <td>{{ patient.email }}</td>
+                                <td>
+                                    <a href="{{ url_for('staff.patient_records', patient_id=patient.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-folder-open"></i> Open Profile
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Appointments Table -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-clock text-info me-2"></i> Recent Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_appointments|length == 0 %}
+                <p class="text-center text-muted my-4">No appointments found.</p>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in recent_appointments %}
+                            <tr>
+                                <td>{{ appt.patient.name if appt.patient else 'Unknown' }}</td>
+                                <td>Dr. {{ appt.doctor.name if appt.doctor else 'Unknown' }}</td>
+                                <td>{{ appt.date }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if appt.status == 'Approved' else 'secondary' }}">{{ appt.status }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

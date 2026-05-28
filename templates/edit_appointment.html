@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Appointment{% endblock %}
+{% block page_title %}Edit Appointment #{{ appt.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Edit Appointment</h5>
+    </div>
+    <form method="POST" action="{{ url_for('staff.edit_appointment', id=appt.id) }}">
+        <div class="card-body">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.patient_id.label }}</label>
+                    {{ form.patient_id(class="form-select", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.department.label }}</label>
+                    {{ form.department(class="form-select", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.doctor_id.label }}</label>
+                    {{ form.doctor_id(class="form-select", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.hospital_branch.label }}</label>
+                    {{ form.hospital_branch(class="form-select", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.appointment_type.label }}</label>
+                    {{ form.appointment_type(class="form-select", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.date.label }}</label>
+                    {{ form.date(class="form-control", type="date", required=True) }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.time.label }}</label>
+                    {{ form.time(class="form-control", type="time", required=True) }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ form.reason.label }}</label>
+                    {{ form.reason(class="form-control", required=True) }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ form.symptoms.label }}</label>
+                    {{ form.symptoms(class="form-control", rows="2") }}
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-end">
+            <a href="{{ url_for('staff.appointments') }}" class="btn btn-secondary me-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Appointment</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

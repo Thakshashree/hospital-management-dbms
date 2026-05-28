@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Inventory Item{% endblock %}
+{% block page_title %}Edit Inventory Item #{{ item.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Edit Item: {{ item.name }}</h5>
+    </div>
+    <form method="POST" action="{{ url_for('staff.edit_inventory', id=item.id) }}">
+        <div class="card-body">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                <label class="form-label">{{ form.name.label }}</label>
+                {{ form.name(class="form-control", required=True) }}
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">{{ form.quantity.label }}</label>
+                    {{ form.quantity(class="form-control", required=True) }}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">{{ form.min_stock.label }}</label>
+                    {{ form.min_stock(class="form-control", required=True) }}
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-end">
+            <a href="{{ url_for('staff.inventory') }}" class="btn btn-secondary me-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Item</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
