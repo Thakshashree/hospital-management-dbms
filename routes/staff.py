@@ -73,7 +73,7 @@ def patients():
 def doctors():
     form = DoctorForm()
     if form.validate_on_submit():
-        user = User(email=form.email.data, name=form.name.data, role='doctor')
+        user = User(email=form.email.data, name=form.name.data, role='staff', staff_role='Doctor')
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -88,7 +88,7 @@ def doctors():
         return redirect(url_for('staff.doctors'))
         
     page = request.args.get('page', 1, type=int)
-    doctors = User.query.filter_by(role='doctor').paginate(page=page, per_page=20)
+    doctors = User.query.filter_by(role='staff', staff_role='Doctor').paginate(page=page, per_page=20)
     return render_template('doctors.html', doctors=doctors, form=form)
 
 from forms import AppointmentForm

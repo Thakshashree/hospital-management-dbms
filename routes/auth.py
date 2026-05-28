@@ -15,6 +15,10 @@ def login():
             login_user(user)
             return redirect(url_for('index'))
         flash('Invalid credentials', 'danger')
+    elif request.method == 'POST':
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", 'danger')
     return render_template('login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
