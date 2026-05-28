@@ -16,9 +16,11 @@ def create_app():
     from routes.auth import auth_bp
     from routes.staff import staff_bp
     from routes.patient import patient_bp
+    from routes.public import public_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(staff_bp)
     app.register_blueprint(patient_bp)
+    app.register_blueprint(public_bp)
     
     with app.app_context():
         db.create_all()
@@ -83,6 +85,7 @@ class Patient(db.Model):
 class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    department = db.Column(db.String(100))
     specialization = db.Column(db.String(100))
     phone = db.Column(db.String(20))
     license_no = db.Column(db.String(50))
@@ -93,10 +96,14 @@ class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     doctor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    department = db.Column(db.String(100))
+    hospital_branch = db.Column(db.String(100))
+    appointment_type = db.Column(db.String(50))
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     status = db.Column(db.String(20), default='Pending')
     reason = db.Column(db.Text)
+    symptoms = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     patient = db.relationship('User', foreign_keys=[patient_id])
     doctor = db.relationship('User', foreign_keys=[doctor_id])
@@ -157,3 +164,11 @@ class MedicalRecord(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     patient = db.relationship('User', foreign_keys=[patient_id])
     doctor = db.relationship('User', foreign_keys=[doctor_id])
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    message = db.Column(db.String(255), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', foreign_keys=[user_id])

@@ -1,6 +1,16 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, TextAreaField, DateField, TimeField, FloatField, IntegerField
-from wtforms.validators import DataRequired, Email, Length, Optional
+from wtforms.validators import DataRequired, Email, Length, Optional, ValidationError
+import re
+
+def strong_password(form, field):
+    password = field.data
+    if len(password) < 8:
+        raise ValidationError('Password must be at least 8 characters.')
+    if not re.search(r'[A-Z]', password):
+        raise ValidationError('Password must contain at least one uppercase letter.')
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-]', password):
+        raise ValidationError('Password must contain at least one special character (!@#$%^&* etc).')
 
 
 class LoginForm(FlaskForm):
@@ -11,13 +21,13 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     name = StringField('Full Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[DataRequired(), strong_password])
 
 
 class PatientForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     name = StringField('Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[DataRequired(), strong_password])
     dob = DateField('Date of Birth', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
     address = TextAreaField('Address', validators=[Optional()])
@@ -28,7 +38,7 @@ class PatientForm(FlaskForm):
 class DoctorForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     name = StringField('Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[DataRequired(), strong_password])
     specialization = StringField('Specialization', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
     license_no = StringField('License No', validators=[DataRequired()])
@@ -60,10 +70,14 @@ class InventoryForm(FlaskForm):
 
 class AppointmentForm(FlaskForm):
     patient_id = SelectField('Patient', coerce=int, validators=[Optional()])
+    department = SelectField('Department', choices=[('', 'Select Department'), ('Cardiology', 'Cardiology'), ('Neurology', 'Neurology'), ('Orthopedics', 'Orthopedics'), ('Pediatrics', 'Pediatrics'), ('General', 'General'), ('ENT', 'ENT')], validators=[DataRequired()])
     doctor_id = SelectField('Doctor', coerce=int, validators=[DataRequired()])
+    hospital_branch = SelectField('Hospital/Branch', choices=[('Main Branch', 'Main Branch'), ('Downtown Clinic', 'Downtown Clinic')], validators=[DataRequired()])
+    appointment_type = SelectField('Appointment Type', choices=[('New consultation', 'New consultation'), ('Follow-up', 'Follow-up'), ('Emergency', 'Emergency'), ('Online', 'Online (Teleconsultation)')], validators=[DataRequired()])
     date = DateField('Date', validators=[DataRequired()])
     time = TimeField('Time', validators=[DataRequired()])
-    reason = TextAreaField('Reason for Visit', validators=[DataRequired()])
+    reason = StringField('Short Reason for Visit', validators=[DataRequired()])
+    symptoms = TextAreaField('Detailed Symptoms / Reason', validators=[Optional()])
 
 
 class FeedbackForm(FlaskForm):
@@ -73,4 +87,4 @@ class FeedbackForm(FlaskForm):
 
 class ForgotPasswordForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
+    new_password = PasswordField('New Password', validators=[DataRequired(), strong_password])

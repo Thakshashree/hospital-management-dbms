@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment - HMS Pro{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Inter', sans-serif;
+    }
+    .booking-wrapper {
+        padding: 3rem 0;
+    }
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin: auto;
+        max-width: 800px;
+        transition: transform 0.3s ease;
+    }
+    .glass-panel:hover {
+        transform: translateY(-5px);
+    }
+    .panel-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    .panel-body {
+        padding: 2.5rem;
+        background: white;
+    }
+    .form-control-custom, .form-select-custom {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+        width: 100%;
+        display: block;
+    }
+    .form-control-custom:focus, .form-select-custom:focus {
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
+        border-color: #4facfe;
+        outline: none;
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        padding: 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        width: 100%;
+        font-size: 1.1rem;
+    }
+    .btn-gradient:hover {
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        transform: translateY(-2px);
+    }
+    .section-title {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .guest-fields {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        border: 1px dashed #ccc;
+    }
+    label {
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -10px;
+        margin-left: -10px;
+    }
+    .form-col {
+        flex: 1;
+        padding: 0 10px;
+        margin-bottom: 1.5rem;
+        min-width: 250px;
+    }
+</style>
+
+<div class="container booking-wrapper">
+    <div class="glass-panel">
+        <div class="panel-header">
+            <i class="fas fa-calendar-check mb-3" style="font-size: 3rem;"></i>
+            <h2 class="font-weight-bold mb-0">Book an Appointment</h2>
+            <p class="mb-0 text-white-50">Fast, easy, and secure.</p>
+        </div>
+        <div class="panel-body">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('public.public_book') }}">
+                {{ form.hidden_tag() }}
+                
+                {% if not current_user.is_authenticated %}
+                <div class="guest-fields">
+                    <h5 class="mb-3" style="color: #4facfe;"><i class="fas fa-user-circle me-2"></i>Patient Details (Guest)</h5>
+                    <p class="small text-muted mb-3">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a> for faster booking.</p>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Full Name</label>
+                            <input type="text" name="guest_name" class="form-control-custom" placeholder="Jane Doe" required>
+                        </div>
+                        <div class="form-col">
+                            <label>Email Address</label>
+                            <input type="email" name="guest_email" class="form-control-custom" placeholder="jane@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Contact Number</label>
+                            <input type="text" name="guest_phone" class="form-control-custom" placeholder="123-456-7890" required>
+                        </div>
+                        <div class="form-col">
+                            <label>Age</label>
+                            <input type="number" name="guest_age" class="form-control-custom" placeholder="Years" required>
+                        </div>
+                        <div class="form-col">
+                            <label>Gender</label>
+                            <select name="guest_gender" class="form-select-custom" required>
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info border-0" style="background: rgba(79, 172, 254, 0.1); color: #0088cc; border-radius: 10px;">
+                    <i class="fas fa-info-circle me-2"></i> Booking as <strong>{{ current_user.name }}</strong>. Your details will be auto-filled.
+                </div>
+                {% endif %}
+
+                <h4 class="section-title">Appointment Details</h4>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>{{ form.department.label }}</label>
+                        {{ form.department(class="form-select-custom", id="department-select") }}
+                    </div>
+                    <div class="form-col">
+                        <label>{{ form.doctor_id.label }}</label>
+                        {{ form.doctor_id(class="form-select-custom", id="doctor-select") }}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>{{ form.hospital_branch.label }}</label>
+                        {{ form.hospital_branch(class="form-select-custom") }}
+                    </div>
+                    <div class="form-col">
+                        <label>{{ form.appointment_type.label }}</label>
+                        {{ form.appointment_type(class="form-select-custom") }}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>{{ form.date.label }}</label>
+                        {{ form.date(class="form-control-custom", type="date", id="appt-date") }}
+                    </div>
+                    <div class="form-col">
+                        <label>{{ form.time.label }}</label>
+                        {{ form.time(class="form-control-custom", type="time") }}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>{{ form.reason.label }}</label>
+                        {{ form.reason(class="form-control-custom", placeholder="e.g. Routine checkup") }}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>{{ form.symptoms.label }}</label>
+                        {{ form.symptoms(class="form-control-custom", rows="3", placeholder="Describe your symptoms to help the doctor prepare...") }}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-gradient">Confirm Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set min date to today
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('appt-date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+        }
+        
+        // Basic filtering of doctors by department (frontend only for simplicity in this demo)
+        const deptSelect = document.getElementById('department-select');
+        const docSelect = document.getElementById('doctor-select');
+        const docOptions = Array.from(docSelect.options);
+        
+        deptSelect.addEventListener('change', function() {
+            const selectedDept = this.value;
+            docSelect.innerHTML = '';
+            
+            docOptions.forEach(opt => {
+                if (selectedDept === '' || opt.text.includes(selectedDept) || opt.value === '') {
+                    docSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -30,13 +30,24 @@ def register():
         password = request.form.get('password')
         age = request.form.get('age')
         gender = request.form.get('gender')
-        
+
         staff_role = request.form.get('staff_role') if role == 'staff' else None
         department = request.form.get('department') if role == 'staff' else None
         staff_id = request.form.get('staff_id') if role == 'staff' else None
 
+        import re
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'danger')
+            return redirect(url_for('auth.register'))
+        if not re.search(r'[A-Z]', password):
+            flash('Password must contain at least one uppercase letter (e.g. A, B, C).', 'danger')
+            return redirect(url_for('auth.register'))
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-]', password):
+            flash('Password must contain at least one special character (e.g. @, #, $, !).', 'danger')
+            return redirect(url_for('auth.register'))
+
         if User.query.filter_by(email=email).first():
-            flash('Email already registered', 'danger')
+            flash('Email already registered. Please login instead.', 'danger')
             return redirect(url_for('auth.register'))
 
         user = User(email=email, name=name, role=role, age=age, gender=gender,
@@ -50,7 +61,7 @@ def register():
             db.session.add(patient)
             db.session.commit()
 
-        flash('Account created successfully! You can now log in.', 'success')
+        flash('Account created successfully! Please sign in with your new credentials.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('register.html')

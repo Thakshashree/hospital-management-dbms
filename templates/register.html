@@ -135,9 +135,18 @@
                     <input type="email" name="email" class="form-control form-control-custom" placeholder="name@example.com" required>
                 </div>
                 
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="form-label text-muted small font-weight-bold text-uppercase">Password</label>
-                    <input type="password" name="password" class="form-control form-control-custom" placeholder="Create a strong password" required>
+                    <input type="password" name="password" id="regPwd" class="form-control form-control-custom" placeholder="Min 8 chars, 1 uppercase, 1 special" required>
+                </div>
+                <!-- Password strength bar -->
+                <div style="height:6px; background:#eee; border-radius:4px; margin-bottom:8px;">
+                    <div id="regStrengthBar" style="height:6px; border-radius:4px; width:0%; transition:all 0.4s;"></div>
+                </div>
+                <div id="regPwdReqs" class="mb-3" style="font-size:0.8rem;">
+                    <div id="rr-len" style="color:#aaa; margin-bottom:3px;"><i class="fas fa-circle-dot me-1"></i>At least 8 characters</div>
+                    <div id="rr-upper" style="color:#aaa; margin-bottom:3px;"><i class="fas fa-circle-dot me-1"></i>At least 1 uppercase letter (A–Z)</div>
+                    <div id="rr-special" style="color:#aaa; margin-bottom:3px;"><i class="fas fa-circle-dot me-1"></i>At least 1 special character (!@#$%^&*)</div>
                 </div>
 
                 <div class="row">
@@ -228,6 +237,38 @@
             roleRadios[i].addEventListener('change', toggleStaffFields);
         }
         toggleStaffFields();
+
+        // Password strength checker
+        const regPwd = document.getElementById('regPwd');
+        const regBar = document.getElementById('regStrengthBar');
+        const rrLen = document.getElementById('rr-len');
+        const rrUpper = document.getElementById('rr-upper');
+        const rrSpecial = document.getElementById('rr-special');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        regPwd.addEventListener('input', function () {
+            const val = this.value;
+            const hasLen = val.length >= 8;
+            const hasUpper = /[A-Z]/.test(val);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-]/.test(val);
+
+            updateReq(rrLen, hasLen);
+            updateReq(rrUpper, hasUpper);
+            updateReq(rrSpecial, hasSpecial);
+
+            const score = [hasLen, hasUpper, hasSpecial].filter(Boolean).length;
+            const colors = ['#dc3545', '#fd7e14', '#28a745'];
+            const widths = ['33%', '66%', '100%'];
+            regBar.style.width = score > 0 ? widths[score - 1] : '0%';
+            regBar.style.background = score > 0 ? colors[score - 1] : 'transparent';
+
+            submitBtn.disabled = !(hasLen && hasUpper && hasSpecial);
+        });
+
+        function updateReq(el, met) {
+            el.style.color = met ? '#28a745' : '#aaa';
+            el.querySelector('i').className = 'fas me-1 ' + (met ? 'fa-check-circle' : 'fa-circle-dot');
+        }
     });
 </script>
 {% endblock %}
