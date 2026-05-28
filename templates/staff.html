@@ -1,136 +1,223 @@
 {% extends "base.html" %}
 
-{% block title %}Staff Dashboard{% endblock %}
+{% block title %}Staff Dashboard - HMS Pro{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    body {
+        background: #f4f7f6;
+        font-family: 'Inter', sans-serif;
+    }
+    .welcome-banner {
+        background: linear-gradient(135deg, #1d2b64 0%, #f8cdda 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .welcome-banner h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        margin-right: 1.5rem;
+    }
+    .stat-info h3 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+    }
+    .stat-info p {
+        margin: 0;
+        color: #888;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        height: 100%;
+    }
+    .chart-card h5 {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+    }
+    
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    .module-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .module-card:hover {
+        transform: translateY(-5px);
+        border-color: #4facfe;
+        color: #4facfe;
+    }
+    .module-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #4facfe;
+    }
+    .module-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="welcome-banner">
+    <h1>Staff Portal</h1>
+    <p class="mb-0 text-white-50">Manage operations, patients, and hospital resources from one place.</p>
+</div>
+
+<!-- Stats Row -->
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-center h-100 border-start border-primary border-4">
-            <div class="card-body">
-                <i class="fas fa-users card-icon mb-3"></i>
-                <h5 class="card-title text-muted">Total Patients</h5>
-                <h2 class="font-weight-bold">{{ total_patients }}</h2>
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_patients }}</h3>
+                <p>Total Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ today_appointments }}</h3>
+                <p>Today's Appts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ available_beds }}</h3>
+                <p>Available Beds</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center h-100 border-start border-success border-4">
-            <div class="card-body">
-                <i class="fas fa-calendar card-icon text-success mb-3"></i>
-                <h5 class="card-title text-muted">Today's Appts</h5>
-                <h2 class="font-weight-bold">{{ today_appointments }}</h2>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);">
+                <i class="fas fa-file-invoice-dollar"></i>
             </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center h-100 border-start border-info border-4">
-            <div class="card-body">
-                <i class="fas fa-bed card-icon text-info mb-3"></i>
-                <h5 class="card-title text-muted">Available Beds</h5>
-                <h2 class="font-weight-bold">{{ available_beds }}</h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center h-100 border-start border-danger border-4">
-            <div class="card-body">
-                <i class="fas fa-file-invoice card-icon text-danger mb-3"></i>
-                <h5 class="card-title text-muted">Pending Bills</h5>
-                <h2 class="font-weight-bold">{{ pending_bills }}</h2>
+            <div class="stat-info">
+                <h3>{{ pending_bills }}</h3>
+                <p>Pending Bills</p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card h-100">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                <h6 class="text-uppercase text-muted font-weight-bold mb-0">Appointments (Last 7 Days)</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="apptChart" height="100"></canvas>
+<!-- Charts Row -->
+<div class="row mb-5">
+    <div class="col-md-8 mb-4 mb-md-0">
+        <div class="chart-card">
+            <h5><i class="fas fa-chart-line text-primary me-2"></i> Appointments (Last 7 Days)</h5>
+            <div style="height: 250px;">
+                <canvas id="apptChart"></canvas>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                <h6 class="text-uppercase text-muted font-weight-bold mb-0">Revenue (6 Months)</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueChart" height="200"></canvas>
+        <div class="chart-card">
+            <h5><i class="fas fa-chart-bar text-success me-2"></i> Revenue</h5>
+            <div style="height: 250px;">
+                <canvas id="revenueChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Quick Access Modules -->
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Patients Management</h5>
-                <p class="card-text text-muted">Register and manage patient profiles.</p>
-                <a href="{{ url_for('staff.patients') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-user-md fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Doctors Roster</h5>
-                <p class="card-text text-muted">Manage doctor profiles and schedules.</p>
-                <a href="{{ url_for('staff.doctors') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Appointments</h5>
-                <p class="card-text text-muted">View and manage all appointments.</p>
-                <a href="{{ url_for('staff.appointments') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Row 2 -->
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-bed fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Room Management</h5>
-                <p class="card-text text-muted">Track bed availability and admissions.</p>
-                <a href="{{ url_for('staff.rooms') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-flask fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Laboratory</h5>
-                <p class="card-text text-muted">Manage tests and lab results.</p>
-                <a href="{{ url_for('staff.lab') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <i class="fas fa-file-invoice-dollar fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Billing & Finance</h5>
-                <p class="card-text text-muted">Manage invoices and payments.</p>
-                <a href="{{ url_for('staff.billing') }}" class="btn btn-primary mt-auto mx-auto px-4">Open</a>
-            </div>
-        </div>
-    </div>
+<!-- Modules Grid -->
+<h4 class="font-weight-bold mb-4 text-secondary">Management Modules</h4>
+<div class="module-grid">
+    <a href="{{ url_for('staff.patients') }}" class="module-card">
+        <i class="fas fa-user-injured module-icon"></i>
+        <div class="module-title">Patients</div>
+    </a>
+    <a href="{{ url_for('staff.doctors') }}" class="module-card">
+        <i class="fas fa-user-md module-icon"></i>
+        <div class="module-title">Doctors</div>
+    </a>
+    <a href="{{ url_for('staff.appointments') }}" class="module-card">
+        <i class="fas fa-calendar-alt module-icon"></i>
+        <div class="module-title">Appointments</div>
+    </a>
+    <a href="{{ url_for('staff.rooms') }}" class="module-card">
+        <i class="fas fa-procedures module-icon"></i>
+        <div class="module-title">Rooms & Beds</div>
+    </a>
+    <a href="{{ url_for('staff.lab') }}" class="module-card">
+        <i class="fas fa-microscope module-icon"></i>
+        <div class="module-title">Lab Reports</div>
+    </a>
+    <a href="{{ url_for('staff.billing') }}" class="module-card">
+        <i class="fas fa-receipt module-icon"></i>
+        <div class="module-title">Billing</div>
+    </a>
+    <a href="{{ url_for('staff.inventory') }}" class="module-card">
+        <i class="fas fa-boxes module-icon"></i>
+        <div class="module-title">Inventory</div>
+    </a>
+    <a href="{{ url_for('staff.feedback') }}" class="module-card">
+        <i class="fas fa-comments module-icon"></i>
+        <div class="module-title">Feedback</div>
+    </a>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -143,13 +230,26 @@
             datasets: [{
                 label: 'Appointments',
                 data: {{ appt_counts|tojson }},
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                tension: 0.3,
-                fill: true
+                borderColor: '#4facfe',
+                backgroundColor: 'rgba(79, 172, 254, 0.2)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#4facfe',
+                pointBorderWidth: 2,
+                pointRadius: 4
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { 
+                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                x: { grid: { display: false } }
+            }
+        }
     });
 
     const revCtx = document.getElementById('revenueChart').getContext('2d');
@@ -160,10 +260,19 @@
             datasets: [{
                 label: 'Revenue ($)',
                 data: {{ revenue_data|tojson }},
-                backgroundColor: '#198754'
+                backgroundColor: 'rgba(67, 233, 123, 0.8)',
+                borderRadius: 5
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { 
+                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                x: { grid: { display: false } }
+            }
+        }
     });
 </script>
 {% endblock %}

@@ -133,7 +133,10 @@
                             </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-0 font-weight-bold">Dr. {{ appt.doctor.name }}</h6>
-                                <small class="text-muted">{{ appt.department }} • {{ appt.date.strftime('%b %d, %Y') }} at {{ appt.time.strftime('%I:%M %p') }}</small>
+                                <small class="text-muted d-block">{{ appt.department }} • {{ appt.date.strftime('%b %d, %Y') }} at {{ appt.time.strftime('%I:%M %p') }}</small>
+                                {% if appt.reason %}
+                                <small class="text-secondary fst-italic">Reason: {{ appt.reason }}</small>
+                                {% endif %}
                             </div>
                             <div>
                                 <span class="badge bg-{{ 'success' if appt.status == 'Approved' else 'warning' }} mb-2 d-block">{{ appt.status }}</span>

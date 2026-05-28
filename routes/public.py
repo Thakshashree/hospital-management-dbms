@@ -12,7 +12,7 @@ def public_book():
     
     # Populate doctors for the form
     doctors = Doctor.query.all()
-    form.doctor_id.choices = [(d.user_id, f"Dr. {d.user.name} ({d.department or d.specialization})") for d in doctors if d.user]
+    form.doctor_id.choices = [(d.user_id, f"Dr. {d.user.name} ({d.department or d.specialization}) - {d.working_hours or 'Flexible'}") for d in doctors if d.user]
     
     # Optional dynamic filtering could be handled via JS
     if request.method == 'GET' and current_user.is_authenticated and current_user.role == 'patient':

@@ -73,13 +73,13 @@ def patients():
 def doctors():
     form = DoctorForm()
     if form.validate_on_submit():
-        user = User(email=form.email.data, name=form.name.data, role='staff', staff_role='Doctor')
+        user = User(email=form.email.data, name=form.name.data, role='staff', staff_role='Doctor', department=form.department.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         
         doctor = Doctor(
-            user_id=user.id, specialization=form.specialization.data,
+            user_id=user.id, specialization=form.specialization.data, department=form.department.data, working_hours=form.working_hours.data,
             phone=form.phone.data, license_no=form.license_no.data, fee=form.fee.data
         )
         db.session.add(doctor)
@@ -104,7 +104,9 @@ def appointments():
     if form.validate_on_submit():
         appt = Appointment(
             patient_id=form.patient_id.data, doctor_id=form.doctor_id.data,
-            date=form.date.data, time=form.time.data, reason=form.reason.data,
+            department=form.department.data, hospital_branch=form.hospital_branch.data,
+            appointment_type=form.appointment_type.data, date=form.date.data,
+            time=form.time.data, reason=form.reason.data, symptoms=form.symptoms.data,
             status='Approved'
         )
         db.session.add(appt)

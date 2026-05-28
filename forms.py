@@ -40,6 +40,8 @@ class DoctorForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), strong_password])
     specialization = StringField('Specialization', validators=[DataRequired()])
+    department = SelectField('Department', choices=[('Cardiology', 'Cardiology'), ('Neurology', 'Neurology'), ('Orthopedics', 'Orthopedics'), ('Pediatrics', 'Pediatrics'), ('General', 'General'), ('ENT', 'ENT')], validators=[DataRequired()])
+    working_hours = StringField('Working Hours', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
     license_no = StringField('License No', validators=[DataRequired()])
     fee = FloatField('Consultation Fee', validators=[DataRequired()])

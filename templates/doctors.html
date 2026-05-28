@@ -18,6 +18,8 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Working Hours</th>
                     <th>Phone</th>
                     <th>License No</th>
                     <th>Consultation Fee</th>
@@ -30,6 +32,8 @@
                     <td>{{ doctor.id }}</td>
                     <td><strong>{{ doctor.name }}</strong></td>
                     <td><span class="badge bg-primary">{{ doctor.doctor_profile[0].specialization if doctor.doctor_profile else 'N/A' }}</span></td>
+                    <td><span class="badge bg-info">{{ doctor.department or (doctor.doctor_profile[0].department if doctor.doctor_profile else 'N/A') }}</span></td>
+                    <td>{{ doctor.doctor_profile[0].working_hours if doctor.doctor_profile else 'Flexible' }}</td>
                     <td>{{ doctor.doctor_profile[0].phone if doctor.doctor_profile else 'N/A' }}</td>
                     <td>{{ doctor.doctor_profile[0].license_no if doctor.doctor_profile else 'N/A' }}</td>
                     <td>${{ doctor.doctor_profile[0].fee if doctor.doctor_profile else 'N/A' }}</td>
@@ -71,6 +75,14 @@
                         <div class="col-md-6">
                             <label class="form-label">{{ form.specialization.label }}</label>
                             {{ form.specialization(class="form-control", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.department.label }}</label>
+                            {{ form.department(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.working_hours.label }}</label>
+                            {{ form.working_hours(class="form-control", placeholder="e.g. 09:00 AM - 05:00 PM", required=True) }}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{{ form.phone.label }}</label>

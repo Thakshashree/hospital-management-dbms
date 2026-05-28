@@ -87,6 +87,7 @@ class Doctor(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     department = db.Column(db.String(100))
     specialization = db.Column(db.String(100))
+    working_hours = db.Column(db.String(50))
     phone = db.Column(db.String(20))
     license_no = db.Column(db.String(50))
     fee = db.Column(db.Float)

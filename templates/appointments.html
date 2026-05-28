@@ -65,25 +65,43 @@
             <form method="POST" action="{{ url_for('staff.appointments') }}">
                 <div class="modal-body">
                     {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.patient_id.label }}</label>
-                        {{ form.patient_id(class="form-select", required=True) }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.doctor_id.label }}</label>
-                        {{ form.doctor_id(class="form-select", required=True) }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.date.label }}</label>
-                        {{ form.date(class="form-control", type="date", required=True) }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.time.label }}</label>
-                        {{ form.time(class="form-control", type="time", required=True) }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ form.reason.label }}</label>
-                        {{ form.reason(class="form-control", rows="2", required=True) }}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.patient_id.label }}</label>
+                            {{ form.patient_id(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.department.label }}</label>
+                            {{ form.department(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.doctor_id.label }}</label>
+                            {{ form.doctor_id(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.hospital_branch.label }}</label>
+                            {{ form.hospital_branch(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.appointment_type.label }}</label>
+                            {{ form.appointment_type(class="form-select", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.date.label }}</label>
+                            {{ form.date(class="form-control", type="date", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.time.label }}</label>
+                            {{ form.time(class="form-control", type="time", required=True) }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form.reason.label }}</label>
+                            {{ form.reason(class="form-control", required=True) }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form.symptoms.label }}</label>
+                            {{ form.symptoms(class="form-control", rows="2") }}
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">

@@ -32,8 +32,9 @@
                     <td><span class="badge bg-info">{{ patient.patient_profile[0].blood_group if patient.patient_profile else 'N/A' }}</span></td>
                     <td>{{ patient.patient_profile[0].emergency_contact if patient.patient_profile else 'N/A' }}</td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                        <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                        <a href="{{ url_for('staff.records', patient_id=patient.id) }}" class="btn btn-sm btn-outline-info" title="View Records"><i class="fas fa-notes-medical"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></a>
                     </td>
                 </tr>
                 {% endfor %}
