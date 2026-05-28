@@ -24,12 +24,14 @@ def register():
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
 
         if User.query.filter_by(email=email).first():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register'))
 
-        user = User(email=email, name=name, role=role)
+        user = User(email=email, name=name, role=role, age=age, gender=gender)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
