@@ -55,6 +55,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     age = db.Column(db.Integer)
     gender = db.Column(db.String(10))
+    staff_role = db.Column(db.String(50))
+    department = db.Column(db.String(50))
+    staff_id = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def set_password(self, password): 
