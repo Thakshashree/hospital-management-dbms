@@ -421,38 +421,6 @@
             transform: translateY(-2px);
         }
 
-        .demo-creds {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-        }
-        .demo-creds .title {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .demo-creds .cred-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.45);
-            margin-bottom: 0.35rem;
-        }
-        .demo-creds .cred-row:last-child { margin-bottom: 0; }
-        .demo-creds .cred-row i { color: #4facfe; width: 16px; }
-        .demo-creds .cred-row code {
-            background: rgba(79, 172, 254, 0.1);
-            padding: 0.15rem 0.5rem;
-            border-radius: 5px;
-            color: #4facfe;
-            font-size: 0.78rem;
-        }
 
         /* Flash messages */
         .alert-float {
@@ -588,20 +556,6 @@
         <a href="{{ url_for('auth.register') }}" class="btn-register">
             <i class="fas fa-user-plus me-2"></i>Create New Account
         </a>
-
-        <div class="demo-creds">
-            <div class="title">Demo Credentials</div>
-            <div class="cred-row">
-                <i class="fas fa-user-md"></i>
-                <span>Staff:</span>
-                <code>staff@test.com</code> / <code>123456</code>
-            </div>
-            <div class="cred-row">
-                <i class="fas fa-user"></i>
-                <span>Patient:</span>
-                <code>patient@test.com</code> / <code>123456</code>
-            </div>
-        </div>
     </div>
 </div>
 
