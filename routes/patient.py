@@ -40,8 +40,8 @@ def dashboard():
 @patient_bp.route('/book', methods=['GET', 'POST'])
 def book():
     form = AppointmentForm()
-    doctors = User.query.filter_by(role='staff').all()
-    form.doctor_id.choices = [(d.id, d.name) for d in doctors]
+    doctors = Doctor.query.filter_by(status='Active').all()
+    form.doctor_id.choices = [(d.user_id, d.user.name) for d in doctors if d.user]
     
     if form.validate_on_submit():
         appt = Appointment(

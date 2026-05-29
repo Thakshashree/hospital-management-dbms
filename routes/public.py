@@ -10,8 +10,8 @@ public_bp = Blueprint('public', __name__)
 def public_book():
     form = AppointmentForm()
     
-    # Populate doctors for the form
-    doctors = Doctor.query.all()
+    # Populate active doctors for the form
+    doctors = Doctor.query.filter_by(status='Active').all()
     form.doctor_id.choices = [(d.user_id, f"Dr. {d.user.name} ({d.department or d.specialization}) - {d.working_hours or 'Flexible'}") for d in doctors if d.user]
     
     # Optional dynamic filtering could be handled via JS

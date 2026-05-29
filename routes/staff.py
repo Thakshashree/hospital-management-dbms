@@ -37,12 +37,13 @@ def get_upload_folder():
 @staff_bp.route('/dashboard')
 def dashboard():
     total_patients    = User.query.filter_by(role='patient').count()
+    total_appointments = Appointment.query.count()
     today_appointments = Appointment.query.filter_by(date=date.today()).count()
     available_beds    = Room.query.filter_by(status='Vacant').count()
     pending_bills     = Invoice.query.filter_by(status='Unpaid').count()
 
     chart_labels  = [(date.today() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
-    appt_counts   = [5, 8, 12, 7, 10, 15, today_appointments]
+    appt_counts   = [Appointment.query.filter_by(date=(date.today() - timedelta(days=i))).count() for i in range(6, -1, -1)]
     revenue_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
     revenue_data   = [5000, 7000, 6500, 8000, 9500, 11000]
 
@@ -181,9 +182,9 @@ def delete_doctor(id):
 @staff_bp.route('/appointments', methods=['GET', 'POST'])
 def appointments():
     form = AppointmentForm()
-    doctors_qs  = User.query.filter_by(role='staff').all()
+    doctors_qs  = Doctor.query.filter_by(status='Active').all()
     patients_qs = User.query.filter_by(role='patient').all()
-    form.doctor_id.choices  = [(d.id, d.name) for d in doctors_qs]
+    form.doctor_id.choices  = [(d.user_id, d.user.name) for d in doctors_qs if d.user]
     form.patient_id.choices = [(p.id, p.name) for p in patients_qs]
 
     if form.validate_on_submit():
@@ -232,9 +233,9 @@ def appointments():
 def edit_appointment(id):
     appt = Appointment.query.get_or_404(id)
     form = AppointmentForm(obj=appt)
-    doctors_qs  = User.query.filter_by(role='staff').all()
+    doctors_qs  = Doctor.query.filter_by(status='Active').all()
     patients_qs = User.query.filter_by(role='patient').all()
-    form.doctor_id.choices  = [(d.id, d.name) for d in doctors_qs]
+    form.doctor_id.choices  = [(d.user_id, d.user.name) for d in doctors_qs if d.user]
     form.patient_id.choices = [(p.id, p.name) for p in patients_qs]
 
     if form.validate_on_submit():
@@ -492,6 +493,7 @@ def feedback():
 
             fb = Feedback(
                 patient_id=None,   # NULL for anonymous entries
+                patient_name=name, # manually entered name
                 rating=rating,
                 comment=comment,
                 status='Open'
@@ -608,3 +610,71 @@ def billing():
 
     invoices = Invoice.query.all()
     return render_template('billing.html', invoices=invoices, form=form)
+
+@staff_bp.route('/billing/toggle/<int:invoice_id>', methods=['POST'])
+def billing_toggle(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    if invoice.status == 'Unpaid':
+        invoice.status = 'Paid'
+    else:
+        invoice.status = 'Unpaid'
+    db.session.commit()
+    flash(f'Invoice INV-{invoice.id} marked as {invoice.status}', 'success')
+    return redirect(url_for('staff.billing'))
+
+@staff_bp.route('/billing/pdf/<int:invoice_id>')
+def billing_pdf(invoice_id):
+    from flask import make_response
+    invoice = Invoice.query.get_or_404(invoice_id)
+    patient_name = invoice.patient.name if invoice.patient else 'Unknown'
+    
+    # Generate minimal PDF without external libraries
+    lines = [
+        "HOSPITAL MANAGEMENT SYSTEM",
+        "=" * 40,
+        f"INVOICE: INV-{invoice.id}",
+        f"Date: {invoice.created_at.strftime('%Y-%m-%d %H:%M') if invoice.created_at else 'N/A'}",
+        "",
+        f"Patient: {patient_name}",
+        f"Description: {invoice.description or 'N/A'}",
+        f"Amount: ${invoice.amount:.2f}" if invoice.amount else "Amount: $0.00",
+        f"Due Date: {invoice.due_date}",
+        f"Status: {invoice.status}",
+        "",
+        "=" * 40,
+        "Thank you for choosing HMS Pro."
+    ]
+    stream_content = ""
+    y = 750
+    for line in lines:
+        escaped = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        stream_content += f"BT /F1 12 Tf 50 {y} Td ({escaped}) Tj ET\n"
+        y -= 20
+    
+    stream_bytes = stream_content.encode('latin-1')
+    
+    obj1 = b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+    obj2 = b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+    obj3 = b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n"
+    obj4 = f"4 0 obj\n<< /Length {len(stream_bytes)} >>\nstream\n".encode('latin-1') + stream_bytes + b"\nendstream\nendobj\n"
+    obj5 = b"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
+    
+    objects = [obj1, obj2, obj3, obj4, obj5]
+    body = b"%PDF-1.4\n"
+    offsets = []
+    for obj in objects:
+        offsets.append(len(body))
+        body += obj
+    
+    xref_offset = len(body)
+    xref = f"xref\n0 {len(objects)+1}\n0000000000 65535 f \n"
+    for off in offsets:
+        xref += f"{off:010d} 00000 n \n"
+    
+    trailer = f"trailer\n<< /Size {len(objects)+1} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF\n"
+    pdf_content = body + xref.encode('latin-1') + trailer.encode('latin-1')
+    
+    response = make_response(pdf_content)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=INV-{invoice.id}.pdf'
+    return response

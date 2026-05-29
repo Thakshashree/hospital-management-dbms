@@ -93,6 +93,7 @@ class Doctor(db.Model):
     phone = db.Column(db.String(20))
     license_no = db.Column(db.String(50))
     fee = db.Column(db.Float)
+    status = db.Column(db.String(20), default='Active')
     user = db.relationship('User', backref='doctor_profile')
 
 class Appointment(db.Model):
@@ -152,10 +153,11 @@ class Inventory(db.Model):
 class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    patient_name = db.Column(db.String(100))
     rating = db.Column(db.Integer)
     comment = db.Column(db.Text)
     status = db.Column(db.String(20), default='Open')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     patient = db.relationship('User', foreign_keys=[patient_id])
 
 class MedicalRecord(db.Model):

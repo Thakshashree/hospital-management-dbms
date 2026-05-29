@@ -43,9 +43,11 @@
                     </td>
                     <td>
                         {% if invoice.status == 'Unpaid' %}
-                        <a href="#" class="btn btn-sm btn-outline-success" title="Mark Paid"><i class="fas fa-check"></i></a>
+                        <form method="POST" action="{{ url_for('staff.billing_toggle', invoice_id=invoice.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Mark Paid"><i class="fas fa-check"></i></button>
+                        </form>
                         {% endif %}
-                        <a href="#" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                        <a href="{{ url_for('staff.billing_pdf', invoice_id=invoice.id) }}" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
                     </td>
                 </tr>
                 {% endfor %}

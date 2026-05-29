@@ -45,7 +45,7 @@
                 {% for fb in feedbacks %}
                 <tr>
                     <td>{{ fb.id }}</td>
-                    <td><strong>{{ fb.patient.name if fb.patient else 'Anonymous' }}</strong></td>
+                    <td><strong>{{ fb.patient.name if fb.patient else (fb.patient_name if fb.patient_name else 'Anonymous') }}</strong></td>
                     <td>{{ fb.created_at.strftime('%Y-%m-%d %H:%M') if fb.created_at else 'N/A' }}</td>
                     <td>
                         <span class="text-warning">
