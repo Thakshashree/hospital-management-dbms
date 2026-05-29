@@ -196,7 +196,7 @@
             </div>
             <h5 class="font-weight-bold">Medical Records</h5>
             <p class="text-muted small">Prescriptions, diagnoses, and past visits.</p>
-            <a href="#" class="action-btn">View History</a>
+            <a href="{{ url_for('patient.appointments') }}" class="action-btn">View History</a>
         </div>
     </div>
 
@@ -232,7 +232,7 @@
             </div>
             <h5 class="font-weight-bold">My Profile</h5>
             <p class="text-muted small">Update personal details and password.</p>
-            <a href="#" class="action-btn">Edit Profile</a>
+            <a href="{{ url_for('patient.profile') }}" class="action-btn">Edit Profile</a>
         </div>
     </div>
 

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}My Bills - HMS Pro{% endblock %}
+{% block page_title %}Billing & Payments{% endblock %}
+
+{% block content %}
+<style>
+    .billing-header {
+        background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 20px rgba(255, 8, 68, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .billing-header h2 { font-weight: 700; margin: 0; }
+    .billing-header p { opacity: 0.9; margin: 0.25rem 0 0; }
+    .stat-pill {
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(5px);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        text-align: center;
+        min-width: 120px;
+    }
+    .stat-pill .number { font-size: 1.75rem; font-weight: 700; }
+    .stat-pill .label { font-size: 0.8rem; opacity: 0.9; }
+
+    .invoice-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .invoice-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .invoice-card .card-body {
+        padding: 1.5rem;
+    }
+    .invoice-id {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    .invoice-desc {
+        color: #666;
+        font-size: 0.95rem;
+    }
+    .invoice-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    .invoice-amount.unpaid { color: #ff0844; }
+    .invoice-amount.paid { color: #28a745; }
+
+    .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .badge-paid { background: #e8f5e9; color: #2e7d32; }
+    .badge-unpaid { background: #fce4ec; color: #c62828; }
+
+    .btn-pay {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-pay:hover {
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-download {
+        background: transparent;
+        border: 1.5px solid #dee2e6;
+        color: #555;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .btn-download:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #adb5bd;
+    }
+    .empty-state i { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state h5 { font-weight: 600; color: #666; }
+
+    /* Payment modal */
+    .pay-modal .modal-content { border-radius: 15px; border: none; overflow: hidden; }
+    .pay-modal .modal-header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; }
+    .pay-modal .modal-footer { border-top: 1px solid #f0f0f0; }
+</style>
+
+<!-- Header with summary stats -->
+<div class="billing-header">
+    <div>
+        <h2><i class="fas fa-file-invoice-dollar me-2"></i>My Bills</h2>
+        <p>Manage your invoices and make payments securely</p>
+    </div>
+    <div class="d-flex gap-3">
+        <div class="stat-pill">
+            <div class="number">{{ total_unpaid }}</div>
+            <div class="label">Unpaid</div>
+        </div>
+        <div class="stat-pill">
+            <div class="number">${{ "%.0f"|format(total_amount) }}</div>
+            <div class="label">Total Due</div>
+        </div>
+    </div>
+</div>
+
+{% if invoices|length == 0 %}
+<div class="empty-state">
+    <i class="fas fa-receipt"></i>
+    <h5>No Bills Found</h5>
+    <p>You don't have any invoices yet. They'll appear here after your visits.</p>
+</div>
+{% else %}
+<!-- Invoice Cards -->
+{% for invoice in invoices %}
+<div class="invoice-card">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <div class="invoice-id">
+                    <i class="fas fa-file-invoice text-primary me-2"></i>INV-{{ invoice.id }}
+                </div>
+                <div class="invoice-desc mt-1">{{ invoice.description or 'Medical Service' }}</div>
+                <small class="text-muted">
+                    <i class="far fa-calendar me-1"></i>
+                    {% if invoice.due_date %}Due: {{ invoice.due_date.strftime('%b %d, %Y') }}{% else %}No due date{% endif %}
+                </small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="invoice-amount {{ 'unpaid' if invoice.status == 'Unpaid' else 'paid' }}">
+                    ${{ "%.2f"|format(invoice.amount) }}
+                </div>
+            </div>
+            <div class="col-md-2 text-center">
+                {% if invoice.status == 'Paid' %}
+                    <span class="badge-status badge-paid"><i class="fas fa-check-circle me-1"></i>Paid</span>
+                {% else %}
+                    <span class="badge-status badge-unpaid"><i class="fas fa-exclamation-circle me-1"></i>Unpaid</span>
+                {% endif %}
+            </div>
+            <div class="col-md-3 text-end">
+                {% if invoice.status == 'Unpaid' %}
+                <button class="btn btn-pay me-2" data-bs-toggle="modal" data-bs-target="#payModal{{ invoice.id }}">
+                    <i class="fas fa-credit-card me-1"></i>Pay Now
+                </button>
+                {% endif %}
+                <button class="btn btn-download" title="Download Invoice">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pay Modal for each unpaid invoice -->
+{% if invoice.status == 'Unpaid' %}
+<div class="modal fade pay-modal" id="payModal{{ invoice.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Secure Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <h3 class="text-primary fw-bold">${{ "%.2f"|format(invoice.amount) }}</h3>
+                    <p class="text-muted">Invoice INV-{{ invoice.id }} — {{ invoice.description or 'Medical Service' }}</p>
+                </div>
+                <form method="POST" action="{{ url_for('patient.pay_bill', invoice_id=invoice.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Card Number</label>
+                        <input type="text" class="form-control" placeholder="4242 4242 4242 4242" style="border-radius:10px; padding:0.75rem;" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Expiry</label>
+                            <input type="text" class="form-control" placeholder="MM/YY" style="border-radius:10px; padding:0.75rem;" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">CVV</label>
+                            <input type="password" class="form-control" placeholder="•••" maxlength="4" style="border-radius:10px; padding:0.75rem;" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-pay w-100 btn-lg mt-2">
+                        <i class="fas fa-shield-alt me-2"></i>Pay ${{ "%.2f"|format(invoice.amount) }}
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <small class="text-muted"><i class="fas fa-lock me-1"></i>256-bit SSL Encrypted • Secure Payment</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% endblock %}
