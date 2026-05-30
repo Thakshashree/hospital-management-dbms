@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - HMS Pro{% endblock %}
+{% block page_title %}My Appointments{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0" style="border-radius: 15px;">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-radius: 15px 15px 0 0;">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-calendar-check text-primary me-2"></i>Upcoming & Past Visits</h5>
+    </div>
+    <div class="card-body">
+        {% if appointments|length == 0 %}
+        <div class="text-center text-muted py-5">
+            <i class="fas fa-calendar-times fa-3x mb-3" style="opacity: 0.3;"></i>
+            <p>You don't have any appointments scheduled.</p>
+        </div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover w-100 align-middle">
+                <thead class="table-light text-uppercase small text-muted">
+                    <tr>
+                        <th class="py-3">Date & Time</th>
+                        <th class="py-3">Doctor</th>
+                        <th class="py-3">Department</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td class="py-3">
+                            <div class="fw-bold text-dark">{{ appt.date.strftime('%B %d, %Y') }}</div>
+                            <div class="text-muted small"><i class="far fa-clock me-1"></i>{{ appt.time.strftime('%I:%M %p') }}</div>
+                        </td>
+                        <td class="py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block">Dr. {{ appt.doctor.name if appt.doctor else 'Unassigned' }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 text-muted">{{ appt.department or 'N/A' }}</td>
+                        <td class="py-3">
+                            {% if appt.status == 'Approved' %}
+                            <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                            {% elif appt.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i>Pending</span>
+                            {% elif appt.status == 'Cancelled' %}
+                            <span class="badge bg-secondary px-3 py-2 rounded-pill"><i class="fas fa-times-circle me-1"></i>Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-secondary px-3 py-2 rounded-pill">{{ appt.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 text-end">
+                            {% if appt.status == 'Pending' %}
+                            <form action="{{ url_for('patient.cancel_appointment', id=appt.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" style="border-radius: 8px;">
+                                    <i class="fas fa-ban me-1"></i>Cancel
+                                </button>
+                            </form>
+                            {% elif appt.status == 'Approved' %}
+                            <span class="text-success small"><i class="fas fa-info-circle me-1"></i>Confirmed</span>
+                            {% else %}
+                            <span class="text-muted small"><i class="fas fa-lock me-1"></i>Closed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

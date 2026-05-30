@@ -27,7 +27,7 @@
     <a class="navbar-brand" href="/"><i class="fas fa-hospital me-2"></i> HMS Pro</a>
     <div class="d-flex align-items-center text-white">
       <span class="me-3">
-        <i class="fas fa-user-circle me-1"></i> Welcome, {{ current_user.name.split('@')[0] if '@' in current_user.name else current_user.name }}
+        <i class="fas fa-user-circle me-1"></i> Welcome, {{ current_user.name }}
         {% if current_user.role == 'staff' and current_user.staff_role %}
           <small class="text-white-50 ms-2">({{ current_user.staff_role }} - {{ current_user.department }} | ID: {{ current_user.staff_id }})</small>
         {% endif %}

@@ -193,26 +193,77 @@
                     <h3 class="text-primary fw-bold">${{ "%.2f"|format(invoice.amount) }}</h3>
                     <p class="text-muted">Invoice INV-{{ invoice.id }} — {{ invoice.description or 'Medical Service' }}</p>
                 </div>
-                <form method="POST" action="{{ url_for('patient.pay_bill', invoice_id=invoice.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small text-uppercase">Card Number</label>
-                        <input type="text" class="form-control" placeholder="4242 4242 4242 4242" style="border-radius:10px; padding:0.75rem;" required>
+                
+                <ul class="nav nav-tabs mb-3" id="paymentTabs{{ invoice.id }}" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#card{{ invoice.id }}" type="button"><i class="fas fa-credit-card me-1"></i>Card</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#upi{{ invoice.id }}" type="button"><i class="fas fa-mobile-alt me-1"></i>UPI</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#qr{{ invoice.id }}" type="button"><i class="fas fa-qrcode me-1"></i>QR Code</button>
+                  </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Card Payment Tab -->
+                    <div class="tab-pane fade show active" id="card{{ invoice.id }}" role="tabpanel">
+                        <form method="POST" action="{{ url_for('patient.pay_bill', invoice_id=invoice.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Card Number</label>
+                                <input type="text" class="form-control" placeholder="4242 4242 4242 4242" style="border-radius:10px; padding:0.75rem;" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Expiry</label>
+                                    <input type="text" class="form-control" placeholder="MM/YY" style="border-radius:10px; padding:0.75rem;" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">CVV</label>
+                                    <input type="password" class="form-control" placeholder="•••" maxlength="4" style="border-radius:10px; padding:0.75rem;" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-pay w-100 btn-lg mt-2">
+                                <i class="fas fa-shield-alt me-2"></i>Pay ${{ "%.2f"|format(invoice.amount) }}
+                            </button>
+                        </form>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Expiry</label>
-                            <input type="text" class="form-control" placeholder="MM/YY" style="border-radius:10px; padding:0.75rem;" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-muted small text-uppercase">CVV</label>
-                            <input type="password" class="form-control" placeholder="•••" maxlength="4" style="border-radius:10px; padding:0.75rem;" required>
-                        </div>
+                    
+                    <!-- UPI Payment Tab -->
+                    <div class="tab-pane fade" id="upi{{ invoice.id }}" role="tabpanel">
+                        <form method="POST" action="{{ url_for('patient.pay_bill', invoice_id=invoice.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">UPI ID (VPA)</label>
+                                <input type="text" class="form-control" placeholder="username@upi" style="border-radius:10px; padding:0.75rem;" required>
+                            </div>
+                            <p class="text-muted small text-center mb-3">You will receive a payment request on your UPI app. Complete it to finalize payment.</p>
+                            <button type="submit" class="btn btn-pay w-100 btn-lg mt-2">
+                                <i class="fas fa-shield-alt me-2"></i>Verify & Pay ${{ "%.2f"|format(invoice.amount) }}
+                            </button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-pay w-100 btn-lg mt-2">
-                        <i class="fas fa-shield-alt me-2"></i>Pay ${{ "%.2f"|format(invoice.amount) }}
-                    </button>
-                </form>
+                    
+                    <!-- QR Code Tab -->
+                    <div class="tab-pane fade" id="qr{{ invoice.id }}" role="tabpanel">
+                        <form method="POST" action="{{ url_for('patient.pay_bill', invoice_id=invoice.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="text-center mb-3">
+                                <div class="p-3 bg-light d-inline-block rounded shadow-sm border mb-2">
+                                    <canvas id="qrCanvas{{ invoice.id }}" width="200" height="200"></canvas>
+                                </div>
+                                <p class="text-muted small mb-1">Scan this QR code with any UPI app</p>
+                                <p class="text-muted small fw-bold">UPI: hospital.hms@upi</p>
+                            </div>
+                            <button type="submit" class="btn btn-pay w-100 btn-lg mt-2">
+                                <i class="fas fa-check-circle me-2"></i>I have completed the payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer justify-content-center">
                 <small class="text-muted"><i class="fas fa-lock me-1"></i>256-bit SSL Encrypted • Secure Payment</small>
@@ -224,4 +275,38 @@
 {% endfor %}
 {% endif %}
 
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Generate QR codes for each unpaid invoice
+    {% for invoice in invoices %}
+    {% if invoice.status == 'Unpaid' %}
+    (function() {
+        var canvas = document.getElementById('qrCanvas{{ invoice.id }}');
+        if (!canvas) return;
+        var container = canvas.parentElement;
+        // Remove canvas, use div for qrcodejs
+        canvas.remove();
+        var qrDiv = document.createElement('div');
+        qrDiv.id = 'qrDiv{{ invoice.id }}';
+        container.appendChild(qrDiv);
+        new QRCode(qrDiv, {
+            text: "upi://pay?pa=hospital.hms@upi&pn=HMS%20Pro%20Hospital&am={{ '%.2f'|format(invoice.amount) }}&tn=INV-{{ invoice.id }}%20Payment&cu=INR",
+            width: 180,
+            height: 180,
+            colorDark: "#1a1a2e",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    })();
+    {% endif %}
+    {% endfor %}
+});
+</script>
 {% endblock %}

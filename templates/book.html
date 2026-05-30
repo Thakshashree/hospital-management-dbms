@@ -1,4 +1,130 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - HMS Pro{% endblock %}
+{% block page_title %}Book Appointment{% endblock %}
+
 {% block content %}
-<h1>Book</h1>
+<style>
+    .booking-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .booking-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    .booking-header h2 { font-weight: 700; margin-bottom: 0.5rem; }
+    .booking-header p { opacity: 0.9; margin: 0; }
+    
+    .booking-body {
+        padding: 2.5rem;
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    .form-control-custom, .form-select-custom {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+    }
+    .form-control-custom:focus, .form-select-custom:focus {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+    }
+    .btn-book {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    .btn-book:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="booking-card">
+            <div class="booking-header">
+                <h2><i class="fas fa-calendar-plus me-2"></i>Schedule a Visit</h2>
+                <p>Fill out the form below to request an appointment with our specialists.</p>
+            </div>
+            <div class="booking-body">
+                <form method="POST" action="{{ url_for('patient.book') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label-custom"><i class="fas fa-hospital me-2"></i>{{ form.hospital_branch.label }}</label>
+                            {{ form.hospital_branch(class="form-select form-select-custom", required=True) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom"><i class="fas fa-stethoscope me-2"></i>{{ form.department.label }}</label>
+                            {{ form.department(class="form-select form-select-custom", required=True) }}
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label-custom"><i class="fas fa-user-md me-2"></i>{{ form.doctor_id.label }}</label>
+                            {{ form.doctor_id(class="form-select form-select-custom", required=True) }}
+                            <small class="text-muted mt-1"><i class="fas fa-info-circle me-1"></i>Only available doctors are shown.</small>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label-custom"><i class="fas fa-video me-2"></i>{{ form.appointment_type.label }}</label>
+                            {{ form.appointment_type(class="form-select form-select-custom", required=True) }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom"><i class="fas fa-calendar-alt me-2"></i>{{ form.date.label }}</label>
+                            {{ form.date(class="form-control form-control-custom", type="date", required=True) }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom"><i class="fas fa-clock me-2"></i>{{ form.time.label }}</label>
+                            {{ form.time(class="form-control form-control-custom", type="time", required=True) }}
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label-custom"><i class="fas fa-file-medical me-2"></i>{{ form.reason.label }}</label>
+                            {{ form.reason(class="form-control form-control-custom", placeholder="Brief description of your visit reason", required=True) }}
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label-custom"><i class="fas fa-thermometer-half me-2"></i>{{ form.symptoms.label }} (Optional)</label>
+                            {{ form.symptoms(class="form-control form-control-custom", rows="3", placeholder="Describe any symptoms you are experiencing...") }}
+                        </div>
+                    </div>
+                    
+                    <!-- We don't need patient_id because we will use current_user.id in the backend -->
+                    {% if form.patient_id %}
+                    <div class="d-none">
+                        {{ form.patient_id() }}
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-book">
+                        <i class="fas fa-check-circle me-2"></i>Confirm Booking Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

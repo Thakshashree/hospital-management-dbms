@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for
 from flask_login import UserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date, time
-from extensions import db, login_manager
+from extensions import db, login_manager, csrf
 
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
@@ -11,6 +11,7 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = 'uploads'
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
     login_manager.login_view = 'auth.login'
     
     from routes.auth import auth_bp

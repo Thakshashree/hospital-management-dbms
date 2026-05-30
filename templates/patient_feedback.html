@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - HMS Pro{% endblock %}
+{% block page_title %}Share Your Feedback{% endblock %}
+
+{% block content %}
+<style>
+    .feedback-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .feedback-banner h2 { font-weight: 700; margin: 0; }
+    .feedback-banner p { opacity: 0.9; margin: 0.25rem 0 0; }
+
+    .feedback-form-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    .feedback-form-card .card-header {
+        background: transparent;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    .feedback-form-card .card-body {
+        padding: 2rem;
+    }
+
+    /* Star Rating */
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+    }
+    .star-rating input {
+        display: none;
+    }
+    .star-rating label {
+        font-size: 2.25rem;
+        color: #dee2e6;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+
+    .btn-submit-feedback {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    .btn-submit-feedback:hover {
+        box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .form-control-feedback {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+    }
+    .form-control-feedback:focus {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+    }
+
+    /* Past Feedback Cards */
+    .past-feedback-card {
+        background: white;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+        border-left: 4px solid #667eea;
+    }
+    .past-feedback-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .past-feedback-card .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+    .feedback-stars {
+        color: #ffc107;
+    }
+    .feedback-date {
+        font-size: 0.82rem;
+        color: #adb5bd;
+    }
+    .feedback-comment {
+        color: #555;
+        margin-top: 0.5rem;
+        line-height: 1.6;
+    }
+    .feedback-status-badge {
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.78rem;
+    }
+    .badge-open { background: #fff3cd; color: #856404; }
+    .badge-resolved { background: #d4edda; color: #155724; }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #adb5bd;
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state h5 { font-weight: 600; color: #666; }
+</style>
+
+<!-- Header Banner -->
+<div class="feedback-banner">
+    <div>
+        <h2><i class="fas fa-comment-dots me-2"></i>Patient Feedback</h2>
+        <p>Your feedback helps us improve our services and provide better care</p>
+    </div>
+    <div>
+        <i class="fas fa-heart" style="font-size: 3rem; opacity: 0.3;"></i>
+    </div>
+</div>
+
+<!-- Feedback Form -->
+<div class="feedback-form-card">
+    <div class="card-header">
+        <i class="fas fa-pen-fancy text-primary me-2"></i> Write Your Feedback
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('patient.feedback') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted small text-uppercase mb-2">
+                    <i class="fas fa-star me-1"></i> How was your experience?
+                </label>
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" checked>
+                    <label for="star5" title="Excellent"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" title="Good"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" title="Average"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" title="Poor"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" title="Terrible"><i class="fas fa-star"></i></label>
+                </div>
+                <small class="text-muted" id="ratingLabel">Selected: <strong>5 — Excellent</strong></small>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted small text-uppercase">
+                    <i class="fas fa-comment me-1"></i> Your Feedback
+                </label>
+                {{ form.comment(class="form-control form-control-feedback", rows="4", placeholder="Tell us about your experience — what went well or what can we improve...") }}
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-submit-feedback">
+                    <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Past Feedback History -->
+<h5 class="fw-bold text-secondary mb-3"><i class="fas fa-history me-2"></i>Your Feedback History</h5>
+
+{% if my_feedbacks|length == 0 %}
+<div class="empty-state">
+    <i class="fas fa-comments"></i>
+    <h5>No Feedback Yet</h5>
+    <p>Once you submit feedback, it will appear here.</p>
+</div>
+{% else %}
+{% for fb in my_feedbacks %}
+<div class="past-feedback-card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="feedback-stars mb-1">
+                    {% for i in range(fb.rating or 0) %}<i class="fas fa-star"></i>{% endfor %}
+                    {% for i in range(5 - (fb.rating or 0)) %}<i class="far fa-star text-muted"></i>{% endfor %}
+                </div>
+                <div class="feedback-comment">{{ fb.comment }}</div>
+            </div>
+            <div class="text-end">
+                {% if fb.status == 'Resolved' %}
+                <span class="feedback-status-badge badge-resolved"><i class="fas fa-check-circle me-1"></i>Resolved</span>
+                {% else %}
+                <span class="feedback-status-badge badge-open"><i class="fas fa-clock me-1"></i>Open</span>
+                {% endif %}
+                <div class="feedback-date mt-2">
+                    <i class="far fa-calendar me-1"></i>{{ fb.created_at.strftime('%b %d, %Y') if fb.created_at else 'N/A' }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Update the rating label text when stars are clicked
+const ratingLabels = {5: 'Excellent', 4: 'Good', 3: 'Average', 2: 'Poor', 1: 'Terrible'};
+document.querySelectorAll('.star-rating input').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const val = parseInt(this.value);
+        document.getElementById('ratingLabel').innerHTML =
+            'Selected: <strong>' + val + ' — ' + ratingLabels[val] + '</strong>';
+    });
+});
+</script>
+{% endblock %}

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
-from models import db, User, Patient, Appointment, LabReport, Invoice, Feedback
+from models import db, User, Patient, Doctor, Appointment, LabReport, Invoice, Feedback, MedicalRecord
 from forms import AppointmentForm, FeedbackForm
 from datetime import datetime, date
 import re
@@ -40,6 +40,9 @@ def dashboard():
 @patient_bp.route('/book', methods=['GET', 'POST'])
 def book():
     form = AppointmentForm()
+    # Remove patient_id from the form for patients since they don't select themselves
+    del form.patient_id
+    
     doctors = Doctor.query.filter_by(status='Active').all()
     form.doctor_id.choices = [(d.user_id, d.user.name) for d in doctors if d.user]
     
@@ -47,29 +50,57 @@ def book():
         appt = Appointment(
             patient_id=current_user.id, doctor_id=form.doctor_id.data,
             date=form.date.data, time=form.time.data, reason=form.reason.data,
-            status='Pending'
+            status='Pending', department=form.department.data, 
+            hospital_branch=form.hospital_branch.data, 
+            appointment_type=form.appointment_type.data, 
+            symptoms=form.symptoms.data
         )
         db.session.add(appt)
         db.session.commit()
         flash('Appointment booked successfully', 'success')
         return redirect(url_for('patient.appointments'))
+    elif request.method == 'POST':
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Error in {getattr(form, field).label.text}: {error}', 'danger')
         
     return render_template('book.html', form=form)
 
 @patient_bp.route('/appointments')
 def appointments():
     appointments = Appointment.query.filter_by(patient_id=current_user.id).all()
-    return render_template('appointments.html', appointments=appointments)
+    return render_template('patient_appointments.html', appointments=appointments)
+
+@patient_bp.route('/appointments/cancel/<int:id>', methods=['POST'])
+def cancel_appointment(id):
+    appt = Appointment.query.get_or_404(id)
+    if appt.patient_id != current_user.id:
+        flash('Unauthorized', 'danger')
+        return redirect(url_for('patient.appointments'))
+    if appt.status == 'Pending':
+        appt.status = 'Cancelled'
+        db.session.commit()
+        flash('Appointment cancelled successfully.', 'success')
+    else:
+        flash('Only pending appointments can be cancelled.', 'warning')
+    return redirect(url_for('patient.appointments'))
+
+@patient_bp.route('/records')
+def records():
+    records = MedicalRecord.query.filter_by(patient_id=current_user.id).order_by(MedicalRecord.date.desc()).all()
+    return render_template('patient_records.html', records=records)
 
 @patient_bp.route('/lab')
 def lab():
     reports = LabReport.query.filter_by(patient_id=current_user.id).all()
     total_reports = len(reports)
     completed_reports = sum(1 for r in reports if r.status == 'Completed')
+    patient_profile = Patient.query.filter_by(user_id=current_user.id).first()
     return render_template('patient_lab.html', 
                            reports=reports,
                            total_reports=total_reports,
-                           completed_reports=completed_reports)
+                           completed_reports=completed_reports,
+                           patient_profile=patient_profile)
 
 @patient_bp.route('/billing')
 def billing():
@@ -159,12 +190,18 @@ def profile():
 def feedback():
     form = FeedbackForm()
     if form.validate_on_submit():
-        feedback = Feedback(
-            patient_id=current_user.id, rating=form.rating.data, comment=form.comment.data
+        fb = Feedback(
+            patient_id=current_user.id,
+            patient_name=current_user.name,
+            rating=form.rating.data,
+            comment=form.comment.data,
+            status='Open'
         )
-        db.session.add(feedback)
+        db.session.add(fb)
         db.session.commit()
-        flash('Feedback submitted', 'success')
-        return redirect(url_for('patient.dashboard'))
-        
-    return render_template('feedback.html', form=form)
+        flash('Thank you! Your feedback has been submitted successfully.', 'success')
+        return redirect(url_for('patient.feedback'))
+    
+    # Show the patient's own past feedback
+    my_feedbacks = Feedback.query.filter_by(patient_id=current_user.id).order_by(Feedback.created_at.desc()).all()
+    return render_template('patient_feedback.html', form=form, my_feedbacks=my_feedbacks)
